@@ -64,8 +64,19 @@ class SiteController extends Controller
         $form = new YandexMoneyForm();
         if ($form->load(Yii::$app->getRequest()->post()) && $form->validate()) {
 
-            $form->parseSms();
-            Yii::$app->session->setFlash('success', 'Произведен разбор сообщения');
+            $parse = $form->parseSms();
+            $msg = 'Произведен разбор сообщения.';
+            if ($parse['code']) {
+                $msg .= " Код подтверждения: <b>{$parse['code']}</b>.";
+            }
+            if ($parse['money']) {
+                $msg .= " Сумма: <b>{$parse['money']}</b>.";
+            }
+            if ($parse['purse']) {
+                $msg .= " Кошелек: <b>{$parse['purse']}</b>.";
+            }
+
+            Yii::$app->session->setFlash('success', $msg);
         }
 
         return $this->render('index', ['model' => $form]);

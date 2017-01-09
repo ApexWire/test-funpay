@@ -36,25 +36,33 @@ class YandexMoneyForm extends Model
         ];
     }
 
+    /**
+     * Функция разбора сообщения
+     *
+     * @return array
+     */
     public function parseSms()
     {
-        preg_match('/([0-9]{4,8})/', $this->sms, $password);
-        echo "<pre>";
-        print_r($password);
-        echo "</pre>";
+        $code = $money = $purse = null;
+        preg_match('/([0-9]{4,8})/', $this->sms, $matches);
+        if (isset($matches[1])) {
+            $code = $matches[1];
+        }
 
-        preg_match('/([0-9]{1,},?[0-9]{0,2}р.)/', $this->sms, $money);
-        echo "<pre>";
-        print_r($money);
-        echo "</pre>";
+        preg_match('/([0-9]{1,}([,|.][0-9]{0,2})?р.)/', $this->sms, $matches);
+        if (isset($matches[1])) {
+            $money = str_replace('р.', '', $matches[1]);
+        }
 
+        preg_match('/(4100[0-9]{10,})/', $this->sms, $matches);
+        if (isset($matches[1])) {
+            $purse = $matches[1];
+        }
 
-        preg_match('/(4100[0-9]{10,})/', $this->sms, $purse);
-
-        echo "<pre>";
-        print_r($purse);
-        echo "</pre>";
-
-        die();
+        return [
+            'code' => $code,
+            'money' => $money,
+            'purse' => $purse,
+        ];
     }
 }
